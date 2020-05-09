@@ -5,7 +5,11 @@ void TelopLayer::onSetup() {
 
 	// font for telop
 	string path = "fonts/GenEiGothicP-Bold.otf";
+#ifdef _DEBUG
+	float fontSize = 40; // smaller to fast debug
+#else
 	float fontSize = 80;
+#endif
 	ofTrueTypeFontSettings settings(path, fontSize);
 	settings.addRanges(ofAlphabet::Latin);
 	settings.addRanges(ofAlphabet::Japanese);
@@ -13,18 +17,39 @@ void TelopLayer::onSetup() {
 	telopFont.load(settings);
 	setTelopText("telop sample");
 
+#ifdef TELOP_USE_MQTT
 	client.begin("localhost", 8883);
 	client.connect("VirtualWebcam_" + ofToString(ofRandom(1000000)), "", "");
 	ofAddListener(client.onOnline, this, &TelopLayer::onOnline);
 	ofAddListener(client.onOffline, this, &TelopLayer::onOffline);
 	ofAddListener(client.onMessage, this, &TelopLayer::onMessage);
+#endif
+
+#ifdef TELOP_USE_OSC
+	oscReceiver.setup(8884);
+#endif
 
 	telopShowDuration = 6.0;
 }
 
 void TelopLayer::onUpdate() {
+#ifdef TELOP_USE_MQTT
 	client.update();
-	
+#endif
+
+#ifdef TELOP_USE_OSC
+	if (oscReceiver.hasWaitingMessages()){
+		auto msg = ofxOscMessage();
+		oscReceiver.getNextMessage(msg);
+		if (msg.getAddress() == "/telop/text") {
+			if (msg.getTypeString() == "s") {
+				string text = msg.getArgAsString(0);
+				setTelopText(text);
+			}
+		}
+	}
+#endif
+
 	// clear expired telop
 	if (ofGetElapsedTimef() - pastSetTelopTime > telopShowDuration && telopText != "") {
 		clearTelopText();
@@ -115,6 +140,7 @@ u32string TelopLayer::UTF8toUTF32(string& str) {
 	return u32string(A.cbegin(), A.cend());
 }
 
+#ifdef TELOP_USE_MQTT
 void TelopLayer::onOnline() {
 	ofLog() << "MQTT online";
 
@@ -130,3 +156,4 @@ void TelopLayer::onMessage(ofxMQTTMessage& msg) {
 
 void TelopLayer::publish(string _topic, string _message) {
 }
+#endif

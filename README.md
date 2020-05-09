@@ -27,9 +27,7 @@ Telop effect needs python script.
 
 Please run python/main.py.
 
-The script works with Google Cloud Platform, and MQTT server.
-
-MQTT server at localhost:8883.
+The script works with Google Cloud Platform.
 
 
 

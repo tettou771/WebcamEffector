@@ -35,8 +35,8 @@ import sys
 from google.cloud import speech_v1 as speech
 import pyaudio
 from six.moves import queue
-from mqtt import mqttPublisher
-
+#from mqtt import mqttPublisher
+from osc import OscSender
 
 # Audio recording parameters
 STREAMING_LIMIT = 240000  # 4 minutes
@@ -48,8 +48,12 @@ GREEN = '\033[0;32m'
 YELLOW = '\033[0;33m'
 
 # mqtt serttings
-publisher = mqttPublisher()
-topic = 'telop'
+#publisher = mqttPublisher()
+#topic = 'telop'
+
+# OSC settings
+oscSender = OscSender()
+oscAddr = '/telop/text'
 
 def get_current_time():
     """Return Current Time in MS."""
@@ -214,7 +218,8 @@ def listen_print_loop(responses, stream):
         # Display interim results, but with a carriage return at the end of the
         # line, so subsequent lines will overwrite them.
 
-        publisher.publish(topic, transcript)
+        #publisher.publish(topic, transcript)
+        oscSender.send(oscAddr, transcript)
 
         if result.is_final:
 

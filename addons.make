@@ -1,3 +1,3 @@
 ofxComponent
-ofxMQTT
+ofxOsc
 ofxSpout

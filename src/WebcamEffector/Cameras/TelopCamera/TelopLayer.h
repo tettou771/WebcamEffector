@@ -1,7 +1,15 @@
 #pragma once
 #include <codecvt>
 #include "ofxComponent.h"
+
+#define TELOP_USE_OSC
+
+#ifdef TELOP_USE_MQTT
 #include "ofxMQTT.h"
+#endif
+#ifdef TELOP_USE_OSC
+#include "ofxOsc.h"
+#endif
 
 using namespace ofxComponent;
 
@@ -27,6 +35,7 @@ private:
 	string UTF32toUTF8(u32string& u32str);
 	u32string UTF8toUTF32(string& str);
 
+#ifdef TELOP_USE_MQTT
 	ofxMQTT client;
 
 	// MQTT handlers
@@ -34,9 +43,15 @@ private:
 	void onOffline();
 	void onMessage(ofxMQTTMessage& msg);
 	void publish(string _topic, string _message);
+#endif
+
+#ifdef TELOP_USE_OSC
+	ofxOscReceiver oscReceiver;
+#endif
 
 	// clear if timeout
 	float pastSetTelopTime; // sec
 	float telopShowDuration; // sec
+
 };
 
