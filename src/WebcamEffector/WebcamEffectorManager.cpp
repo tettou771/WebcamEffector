@@ -11,21 +11,25 @@ void WebcamEffectorManager::onSetup() {
 	//setHeight(WebcamEffectorBase::vcamHeight);
 	setRect(ofRectangle(0, 0, ofGetWidth(), ofGetWidth() * WebcamEffectorBase::vcamHeight / WebcamEffectorBase::vcamWidth));
 
-	cameras.push_back(telopCamera = make_shared<TelopCamera>());
-
-	for (auto& c : cameras) {
+	effectors.push_back(telopCamera = make_shared<TelopCamera>());
+	for (auto& c : effectors) {
 		addChild(c);
 		c->setActive(false);
 	}
 
-	selectedCamera = cameras.front();
-	selectedCamera->setActive(true);
+	addChild(make_shared<TextureSender>());
+
+	selectedEffect = effectors.front();
+	selectedEffect->setActive(true);
 
 	WebcamEffectorBase::initializeOnWebcamEffectorManager();
 
-	// Initialise the Spout sender with a channel name
-	sender.init("Camera");
-
+	// make list
+	ofVideoGrabber v;
+	cameraList = "Press num key to change source camera\n\n";
+	for (auto c : v.listDevices()) {
+		cameraList += ofToString(c.id) + ": " + c.deviceName + "\n";
+	}
 }
 
 void WebcamEffectorManager::onUpdate() {
@@ -33,14 +37,14 @@ void WebcamEffectorManager::onUpdate() {
 }
 
 void WebcamEffectorManager::postUpdate() {
-	if (selectedCamera) {
-		selectedCamera->vcamDraw();
+	if (selectedEffect) {
+		selectedEffect->vcamDraw();
 	}
-	sender.send(WebcamEffectorBase::vcamFbo.getTexture());
 }
 
 void WebcamEffectorManager::onDraw() {
 	WebcamEffectorBase::vcamFbo.draw(0, 0, getWidth(), getHeight());
+	ofDrawBitmapString(cameraList, 10, 20);
 }
 
 void WebcamEffectorManager::onKeyPressed(ofKeyEventArgs& key) {

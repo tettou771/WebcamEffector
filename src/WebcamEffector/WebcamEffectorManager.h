@@ -2,6 +2,7 @@
 #include "ofxSpout.h"
 #include "ofxComponent.h"
 #include "Cameras/TelopCamera/TelopCamera.h"
+#include "TextureSender.h"
 
 using namespace ofxComponent;
 
@@ -18,11 +19,10 @@ public:
 	void onKeyPressed(ofKeyEventArgs& key) override;
 
 private:
-	vector<shared_ptr<WebcamEffectorBase> > cameras;
-	shared_ptr<WebcamEffectorBase> selectedCamera;
+	vector<shared_ptr<WebcamEffectorBase> > effectors;
+	shared_ptr<WebcamEffectorBase> selectedEffect;
+	string cameraList;
 
 	shared_ptr<TelopCamera> telopCamera;
-
-	ofxSpout::Sender sender;
 };
 
