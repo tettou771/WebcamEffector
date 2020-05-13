@@ -1,6 +1,13 @@
 #include "TelopLayer.h"
+#include <locale.h>
+
+TelopLayer::TelopLayer() {
+}
+TelopLayer::~TelopLayer() {
+}
 
 void TelopLayer::onSetup() {
+    setlocale( LC_CTYPE, "ja_JP.UTF-8");
 	fbo.allocate(getWidth(), getHeight(), GL_RGBA);
 
 	// font for telop
@@ -29,7 +36,7 @@ void TelopLayer::onSetup() {
 	oscReceiver.setup(8884);
 #endif
 
-	telopShowDuration = 6.0;
+	telopShowDuration = 2.0;
 }
 
 void TelopLayer::onUpdate() {
@@ -51,7 +58,7 @@ void TelopLayer::onUpdate() {
 #endif
 
 	// clear expired telop
-	if (ofGetElapsedTimef() - pastSetTelopTime > telopShowDuration && telopText != "") {
+	if (ofGetElapsedTimef() - pastSetTelopTime > telopShowDuration && trimmedTelopText != "") {
 		clearTelopText();
 	}
 }
@@ -61,13 +68,37 @@ void TelopLayer::onDraw() {
 
 void TelopLayer::setTelopText(string text) {
 	if (fbo.getWidth() <= 0) return;
-
+    
+    receivedTelopText = text;
+    
+    if (telopShowed.length() < text.length()) {
+        int l = telopShowed.length();
+        if (telopShowed == text.substr(0, telopShowed.length())) {
+            text = text.substr(l, text.length() - l);
+        } else {
+            int i = 0;
+            for (; i < l; ++i) {
+                if (text[i] != telopShowed[i]) {
+                    break;
+                }
+                if (i > 0) {
+                    telopShowed = text.substr(0, i - 1);
+                }else{
+                    telopShowed = "";
+                }
+            }
+        }
+    } else {
+        telopShowed = "";
+        ofLog() << "showed clear";
+    }
+    
 	// trim telop text to shorten
 	int lineLength = 10; // num of characters per line
 	int maxLineNum = 2; // num of max lines
 	auto u32Text = UTF8toUTF32(text);
 	if (u32Text.length() < lineLength) {
-		telopText = text;
+		trimmedTelopText = text;
 	}
 	else {
 		u32string u32ShortText;
@@ -82,14 +113,14 @@ void TelopLayer::setTelopText(string text) {
 			firstline = false;
 		}
 		string shortText = UTF32toUTF8(u32ShortText);
-		telopText = shortText;
+		trimmedTelopText = shortText;
 	}
 
 	fbo.begin();
 	ofClear(0, 0);
 
 	// calc telop geometry to centering
-	auto bbox = telopFont.getStringBoundingBox(telopText, 0, 0);
+	auto bbox = telopFont.getStringBoundingBox(trimmedTelopText, 0, 0);
 	float bottomMargin = 10;
 	ofVec2f offset(-bbox.width / 2, - (bbox.height + bbox.y) - bottomMargin);
 	ofVec2f center(getWidth() / 2, getHeight());
@@ -109,21 +140,26 @@ void TelopLayer::setTelopText(string text) {
 		float r = bottomMargin * 0.5;
 		float x = r * sin(t);
 		float y = r * cos(t);
-		telopFont.drawString(telopText, x, y);
+		telopFont.drawString(trimmedTelopText, x, y);
 	}
 
 	// draw colored
 	ofSetColor(20, 20, 150);
-	telopFont.drawString(telopText, 0, 0);
+	telopFont.drawString(trimmedTelopText, 0, 0);
 
 	ofPopMatrix();
 	fbo.end();
 
 	pastSetTelopTime = ofGetElapsedTimef();
+    
+    ofLog() << telopShowed;
 }
 
 void TelopLayer::clearTelopText() {
-	setTelopText("");
+    telopShowed = receivedTelopText;
+    fbo.begin();
+    ofClear(0, 0);
+    fbo.end();
 }
 
 void TelopLayer::drawTelop() {
@@ -132,7 +168,7 @@ void TelopLayer::drawTelop() {
 }
 
 string TelopLayer::UTF32toUTF8(u32string& u32str) {
-	return convert8_32.to_bytes(reinterpret_cast<const uint32_t*>(u32str.c_str()));
+	return convert8_32.to_bytes(reinterpret_cast<const char32_t*>(u32str.c_str()));
 }
 
 u32string TelopLayer::UTF8toUTF32(string& str) {

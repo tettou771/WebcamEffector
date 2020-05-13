@@ -15,23 +15,31 @@ using namespace ofxComponent;
 
 class TelopLayer :public ofxComponentBase{
 public:
-	void onSetup();
-	void onUpdate();
-	void onDraw();
-
+    TelopLayer();
+    ~TelopLayer();
+    
+	void onSetup() override;
+	void onUpdate() override;
+	void onDraw() override;
+    
 	void setTelopText(string telopText);
 	void clearTelopText();
 	void drawTelop();
 
 private:
 	ofFbo fbo;
-	string telopText;
+	string trimmedTelopText, receivedTelopText;
 	ofTrueTypeFont telopFont;
 
-	// �\���������̒����̂��߂ɕK�v�ȕϊ���(UTF8 UTF32)
-	// char32_t ���g����VS2015�Ń����N�G���[�ƂȂ�̂ŁAunit32_t ���g���Ă���
-	// �\�[�X Qiita http://qiita.com/benikabocha/items/1fc76b8cea404e9591cf
+#ifdef WIN32
+	// 表示文字数の調整のために必要な変換器(UTF8 UTF32)
+	// char32_t を使うとVS2015でリンクエラーとなるので、unit32_t を使っている
+	// ソース Qiita http://qiita.com/benikabocha/items/1fc76b8cea404e9591cf
 	wstring_convert<codecvt_utf8<uint32_t>, uint32_t> convert8_32;
+#else
+    // macの場合は上記の工夫は必要ないので、char32_t を使う
+    wstring_convert<codecvt_utf8<char32_t>, char32_t> convert8_32;
+#endif
 	string UTF32toUTF8(u32string& u32str);
 	u32string UTF8toUTF32(string& str);
 
@@ -52,6 +60,6 @@ private:
 	// clear if timeout
 	float pastSetTelopTime; // sec
 	float telopShowDuration; // sec
-
+    string telopShowed;
 };
 

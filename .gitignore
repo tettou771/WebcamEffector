@@ -91,6 +91,16 @@ Desktop.ini
 # End of https://www.gitignore.io/api/openframeworks+visualstudio
 
 # tettou771 patch for ignore project files
+# for visual studio
 *.sln
 *.vcxproj*
 
+# for visual studio code (python)
+.vscode
+__pycache__
+*.pyc
+
+# for xcode
+*.xcconfig
+*.xcodeproj*
+*.plist

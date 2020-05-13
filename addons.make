@@ -1,3 +1,4 @@
 ofxComponent
 ofxOsc
 ofxSpout
+ofxSyphon

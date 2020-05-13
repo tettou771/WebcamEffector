@@ -5,6 +5,9 @@
 #ifdef WIN32
 	#include "ofxSpout.h"
 #endif
+#ifdef TARGET_OS_MAC
+#include "ofxSyphon.h"
+#endif
 
 using namespace ofxComponent;
 
@@ -17,6 +20,10 @@ private:
 
 #ifdef WIN32
 	ofxSpout::Sender sender;
+#endif
+
+#ifdef TARGET_OS_MAC
+    ofxSyphonServer individualTextureSyphonServer;
 #endif
 
 };
