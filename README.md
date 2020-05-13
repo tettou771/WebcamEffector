@@ -15,6 +15,12 @@ I wanna maintenance for other developer when it becam good code, but it is bad n
 # How to build
 Windows10 + VisualStudio2017 + openFrameworks v0.11.0_vs2017
 
+and
+
+macOS 10.14 + Xcode 11.3 + openFrameworks v0.11.0_osx
+
+
+
 1. Put src files (ex. OF_DIR/apps/WebcamEffector/WebcamEffector/src ... )
 2. Make project files with projectGenerator
 3. Compile with VisualStudio
